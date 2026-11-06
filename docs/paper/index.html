@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Visible Pages Under-Capture Clicks? A Validated Review Queue</title>
+<meta name="description" content="A research paper on finding search pages that get fewer clicks than their position predicts, built on 79M rows of pseudonymised production search data, with a baseline, client-grouped and time-forward validation, and a human-reviewed action playbook.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --text:#1d1d1f; --muted:#5b5b63; --line:#e4e1da;
+  --accent:#2f5d8a; --accent-soft:#eaf1f8; --warn:#8a5a00; --warn-soft:#fff6e0; --good:#2e6b3f;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15161a; --surface:#1d1f24; --text:#e9e7e2; --muted:#a3a3ad; --line:#30323a;
+    --accent:#8db8e3; --accent-soft:#1f2a36; --warn:#f0c46a; --warn-soft:#2b2516; --good:#86c79a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15161a; --surface:#1d1f24; --text:#e9e7e2; --muted:#a3a3ad; --line:#30323a;
+  --accent:#8db8e3; --accent-soft:#1f2a36; --warn:#f0c46a; --warn-soft:#2b2516; --good:#86c79a;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--serif);font-size:19px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.wrap{max-width:760px;margin:0 auto;padding:56px 20px 80px}
+header.paper{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:28px}
+.kicker{font-family:var(--sans);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 14px}
+h1{font-size:clamp(30px,5vw,42px);line-height:1.15;margin:0 0 16px;font-weight:700;letter-spacing:-.01em}
+.subtitle{font-size:21px;color:var(--muted);margin:0 0 20px;font-style:italic}
+.byline{font-family:var(--sans);font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 18px}
+.byline a{color:var(--muted)}
+.abstract{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:22px 24px;margin:28px 0}
+.abstract h2{font-family:var(--sans);font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px;color:var(--accent);border:0;padding:0}
+.abstract p{margin:0}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:24px 0 8px}
+.key{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;font-family:var(--sans)}
+.key b{display:block;font-size:26px;line-height:1.1;font-weight:600;color:var(--text)}
+.key span{font-size:13px;color:var(--muted);line-height:1.35;display:block;margin-top:4px}
+nav.toc{font-family:var(--sans);font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 20px;margin:28px 0 8px}
+nav.toc strong{display:block;margin-bottom:6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:28px}
+nav.toc li{margin:2px 0;break-inside:avoid}
+nav.toc a{color:var(--text);text-decoration:none}
+nav.toc a:hover{color:var(--accent);text-decoration:underline}
+h2{font-size:27px;line-height:1.25;margin:52px 0 14px;padding-top:8px;font-weight:700;scroll-margin-top:20px}
+h2 .n{color:var(--accent);font-weight:600;margin-right:8px}
+h3{font-family:var(--sans);font-size:17px;font-weight:600;margin:30px 0 8px}
+p{margin:0 0 16px}
+a{color:var(--accent);text-underline-offset:2px}
+ul,ol{padding-left:24px;margin:0 0 16px}
+li{margin:4px 0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82em;background:var(--accent-soft);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+figure{margin:28px 0;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px}
+figure img{width:100%;height:auto;display:block;background:#fff;border-radius:3px}
+figcaption{font-family:var(--sans);font-size:14px;color:var(--muted);line-height:1.5;margin-top:10px}
+figcaption b{color:var(--text)}
+.tablewrap{overflow-x:auto;margin:20px 0 24px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:14.5px;line-height:1.45}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;background:var(--accent-soft)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.hl td{background:var(--accent-soft);font-weight:600}
+.callout{border-radius:6px;padding:16px 20px;margin:22px 0;font-size:17.5px}
+.callout.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+.callout.note{background:var(--accent-soft);border-left:4px solid var(--accent)}
+.callout p:last-child{margin:0}
+.tag{font-family:var(--sans);font-size:12px;font-weight:600;padding:2px 7px;border-radius:10px;border:1px solid currentColor;white-space:nowrap}
+.tag.ok{color:var(--good)} .tag.mixed{color:var(--warn)}
+footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);font-family:var(--sans);font-size:14px;color:var(--muted)}
+.theme{position:fixed;top:14px;right:14px;font-family:var(--sans);font-size:13px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:16px;padding:6px 12px;cursor:pointer}
+@media (max-width:600px){
+  body{font-size:17.5px}
+  .wrap{padding:44px 16px 64px}
+  nav.toc ol{columns:1}
+  h2{font-size:23px;margin-top:42px}
+  .abstract{padding:18px}
+  figure{padding:8px}
+}
+@media print{.theme,nav.toc{display:none} body{background:#fff}}
+</style>
+</head>
+<body>
+<button class="theme" id="themeBtn" type="button" aria-label="Toggle light or dark theme">Theme</button>
+<main class="wrap">
+
+<header class="paper">
+  <p class="kicker">Research paper · FlyRank ML Internship · Applied Search Intelligence</p>
+  <h1>Which visible pages under-capture clicks for their search position?</h1>
+  <p class="subtitle">A validated, human-reviewed review queue built on 79 million rows of pseudonymised search data</p>
+  <div class="byline">
+    <span>By <a href="https://github.com/ShayanAhmed12">ShayanAhmed12</a></span>
+    <span>November 2026</span>
+    <span><a href="https://github.com/ShayanAhmed12/flyrank-internship-ml">Code &amp; notebooks</a></span>
+  </div>
+</header>
+
+<section class="abstract" aria-labelledby="abstract">
+  <h2 id="abstract">Abstract</h2>
+  <p>Editors have only a few hours a week to improve search snippets, so the question is <em>which already-visible pages are getting clearly fewer clicks than pages at a similar position, and which should be reviewed first?</em> Using the pseudonymised FlyRank internship warehouse (one row per page per day), I scored about 57,000 visible pages from 36 sites in March 2026 on their first-half-of-month numbers, and labelled whether each page kept under-clicking in the second half. A transparent rule — <em>clicks at stake</em> = the gap to the typical CTR for the position × impressions — reached a Precision@50 of 0.78 on sites it never saw, roughly three times the 0.25 random-pick rate; Random Forest and Gradient Boosting tied it at the top of the list (0.78) but ordered the full list much better (ROC-AUC 0.81 vs 0.55). Frozen on March and applied once to April, both held up (0.88 rule, 0.90 forest), while a naive random page split had overstated the model by about three points. The output is a decision-support playbook — a ranked queue with reason codes, actions, human-review rules and monitoring triggers — that tells an editor where to look first, not what a rewrite will achieve.</p>
+</section>
+
+<div class="keys" role="list">
+  <div class="key" role="listitem"><b>0.78</b><span>Precision@50 of the rule on unseen sites (5 client-grouped folds)</span></div>
+  <div class="key" role="listitem"><b>≈3×</b><span>better than random pick in the same pool (0.25)</span></div>
+  <div class="key" role="listitem"><b>Tie</b><span>models match the rule at the top; win on the full list (AUC 0.81 vs 0.55)</span></div>
+  <div class="key" role="listitem"><b>44/50</b><span>rule's top 50 confirmed when frozen on March and run once on April</span></div>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#intro">Introduction</a></li>
+    <li><a href="#data">Data</a></li>
+    <li><a href="#method">Methodology</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#limits">Limitations &amp; honest framing</a></li>
+    <li><a href="#recs">Ranked recommendations</a></li>
+    <li><a href="#repro">Reproducibility</a></li>
+    <li><a href="#ack">Acknowledgments &amp; data credit</a></li>
+  </ol>
+</nav>
+
+<h2 id="intro"><span class="n">1</span>Introduction</h2>
+<p>Picture an editor on a Monday with forty minutes per page and a list of two thousand pages that already rank on Google. Some of them are seen tens of thousands of times a fortnight and almost never clicked. Which ones deserve the afternoon?</p>
+<p>The obvious answer — sort by lowest click-through rate (CTR) — fails because CTR depends heavily on position: 0.3% is respectable at position 15 and poor at position 2. Small pages make it worse, since one click moves their CTR by a whole point. A fair list has to compare each page with <em>pages like it</em>, and weigh how much is actually at stake.</p>
+<p>This paper asks: <strong>which visible pages under-capture clicks for their position, and does a ranking of them keep pointing at the right pages on sites and in weeks it has never seen?</strong> The answer is a ranked review queue for humans — decision support, not automation.</p>
+
+<h2 id="data"><span class="n">2</span>Data</h2>
+<p>All data comes from the FlyRank ML Internship warehouse release (build <code>v20260703</code>), hosted on Hugging Face. Every client, page, keyword and URL identifier is pseudonymised; no client names, domains, URLs or search queries exist in the release, and none appear in this paper.</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Item</th><th>What I used</th></tr></thead>
+  <tbody>
+    <tr><td>Tables</td><td><code>fact_content_daily_performance</code> (one row = one page per day; ~78.8M rows overall), joined to <code>dim_content</code> for content type, intent and creation date</td></tr>
+    <tr><td>Development month</td><td>March 2026 — decision day 16 March; features from 1–15 March, outcome from 16–31 March</td></tr>
+    <tr><td>Test month</td><td>April 2026 — same design, decision day 16 April, scored once</td></tr>
+    <tr><td>Sealed</td><td>June 2026 (the release's final month) — never touched</td></tr>
+    <tr><td>Population</td><td>Rows with <code>gsc_data_available IS TRUE</code>; average position 1–20; ≥100 impressions in both halves of the month → 57,392 pages / 36 sites (March), 59,532 / 43 (April)</td></tr>
+    <tr><td>Excluded</td><td>Google Analytics columns (zero-filled before each site's tracking began); <code>content_updated_date</code> (an export-time value that falls <em>after</em> the decision day for 82% of pages); product-workflow fields; keyword/URL hashes (used for grouping only)</td></tr>
+  </tbody>
+</table></div>
+<p>Three facts were verified by query before any modelling: the daily table has zero duplicate page-day keys; March holds 9,841,378 rows across 331,437 pages and all 31 days; and only 36.7% of those rows carry Search Console data — the rest are page-days with no search row, not page-days with zero interest.</p>
+
+<h2 id="method"><span class="n">3</span>Methodology</h2>
+<h3>Label — observed later, not defined by a rule on the same numbers</h3>
+<p>A page is labelled <code>under_captures_next = 1</code> if, in the <em>second</em> half of the month, its CTR is below half the median CTR of its position bucket (1–3, 4–10, 11–20). Features only ever see the first half. The label is a proxy for "keeps under-clicking", not for "would gain clicks after a rewrite". In March 39.8% of pages carry the label; in the ≥500-impression pool an editor would actually work from, 26.6%.</p>
+<h3>Features — all knowable on decision day</h3>
+<p>Impressions (log), CTR and impression-weighted position from days 1–15; content type; page age at the decision day; and two derived from the same window — the position bucket's median CTR (<em>expected CTR</em>) and the page's CTR divided by it.</p>
+<h3>Baseline — the rule every model must beat</h3>
+<p>Before modelling, two signals were checked: the CTR-vs-position gap was <span class="tag ok">CONFIRMED</span> (pages under 25% of expected repeated the pattern 67% of the time vs a 40% base rate, monotonic across buckets), while volume was <span class="tag mixed">MIXED</span> (small pages repeat <em>more</em>, so the volume floor is about impact, not reliability). The frozen rule: pages with ≥500 impressions and CTR below half of expected get a score of <strong>clicks at stake = (expected − actual CTR) × impressions</strong>, reason code <code>low_ctr_for_position</code>.</p>
+<h3>Models and validation</h3>
+<p>Logistic Regression, Random Forest and Histogram Gradient Boosting (seed 42) predict the label; their probability is the ranking. Validation is <strong>GroupKFold(5) by site</strong> — no site's pages are in both training and test — plus a <strong>time-forward test</strong>: rule and model frozen on March and scored once on April. The headline metric is Precision@50 inside the ≥500-impression pool (one editor's weekly capacity), always shown with its base rate; ROC-AUC on all pages is secondary.</p>
+<h3>Leakage checks</h3>
+<ul>
+  <li><strong>Positive control:</strong> adding the outcome CTR on purpose sends ROC-AUC to 1.000 (March) and 0.997 (April) — the harness catches leaks; honest scores are 0.80–0.81.</li>
+  <li><strong>No "too good" feature:</strong> the strongest single feature (CTR) reaches AUC 0.739.</li>
+  <li><strong>Dates:</strong> no page was created after its decision day; the post-decision update date is excluded.</li>
+  <li><strong>Disclosed choices:</strong> the population needs ≥100 outcome-window impressions (7% of eligible pages dropped), and the bucket medians are computed over all pages rather than per fold (a mild, label-free transductive effect).</li>
+</ul>
+
+<h2 id="results"><span class="n">4</span>Results</h2>
+<p>The tension in this project: the learned models are clearly better at ordering pages overall, but the editor only reads the top of the list — and there, the rule holds its ground.</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Method (5 client-grouped folds, March)</th><th class="num">P@50</th><th class="num">± fold std</th><th class="num">P@20</th><th class="num">ROC-AUC</th></tr></thead>
+  <tbody>
+    <tr><td>Random pick (pool base rate)</td><td class="num">0.25</td><td class="num">0.08</td><td class="num">0.33</td><td class="num">0.50</td></tr>
+    <tr class="hl"><td>Week-4 rule (clicks at stake)</td><td class="num">0.78</td><td class="num">0.01</td><td class="num">0.80</td><td class="num">0.55</td></tr>
+    <tr><td>Logistic Regression</td><td class="num">0.66</td><td class="num">0.07</td><td class="num">0.70</td><td class="num">0.78</td></tr>
+    <tr><td>Random Forest</td><td class="num">0.78</td><td class="num">0.06</td><td class="num">0.83</td><td class="num">0.81</td></tr>
+    <tr><td>Gradient Boosting</td><td class="num">0.78</td><td class="num">0.06</td><td class="num">0.82</td><td class="num">0.81</td></tr>
+  </tbody>
+</table></div>
+<figure>
+  <img src="img/cap_model_vs_baseline.png" alt="Bar charts: Precision@50 is about 0.78 for the rule, Random Forest and Gradient Boosting, 0.66 for logistic regression and 0.25 for random; ROC-AUC is 0.81 for the tree models versus 0.55 for the rule." loading="lazy">
+  <figcaption><b>Figure 1.</b> At the top of the queue the rule ties the best models and is four times steadier across folds; across the whole list the models rank far better. The rule scores most pages 0, which is why its AUC is low.</figcaption>
+</figure>
+<p>What the models lean on (permutation importance): impressions first, then the CTR-to-expected ratio and CTR itself — in other words they rediscovered the rule's signal and added volume. Their most confident misses are pages with huge impressions and near-zero CTR whose click rate bounced back the next fortnight, consistent with a shifting query mix rather than a fixed snippet problem.</p>
+<h3>Does it survive honest validation?</h3>
+<figure>
+  <img src="img/cap_validation_designs.png" alt="Grouped bars of Precision@50: random split rule 0.73, forest 0.81; grouped by client both 0.78; frozen March to April rule 0.88, forest 0.90." loading="lazy">
+  <figcaption><b>Figure 2.</b> Splitting pages at random let the model memorise each site and made it look ahead of the rule (0.81 vs 0.73). Grouped by site the two tie (0.78); frozen on March and run once on April both held (0.88 / 0.90 — one page in 50 apart, within noise).</figcaption>
+</figure>
+<div class="callout note"><p><strong>Reading the April number carefully:</strong> April was higher for <em>both</em> methods, so its top under-capturers were simply more persistent that month. A single run of 50 pages carries roughly ±0.05 of noise; the conservative expectation is the client-grouped 0.78.</p></div>
+
+<h2 id="limits"><span class="n">5</span>Limitations &amp; honest framing</h2>
+<ul>
+  <li><strong>Not causal.</strong> The data shows which pages kept under-clicking, not that editing them produces clicks. That needs a before/after test against comparable untouched pages.</li>
+  <li><strong>Narrow window.</strong> One development month, one test month, a two-week outcome, 36–43 sites. Two months are not a trend.</li>
+  <li><strong>The yardstick moves.</strong> Typical CTR per position fell between March and April by 19–60% depending on the bucket — "expected CTR" must be recomputed every cycle, and "clicks at stake" is an upper bound, never a forecast.</li>
+  <li><strong>Invisible causes.</strong> Answer boxes, AI overviews and ads that take clicks are not in the data, so a low CTR is never proof of a weak page.</li>
+  <li><strong>Selection and concentration.</strong> Pages that vanished from search in the outcome window are not scored (7%); one site can own 32–38% of the top 50.</li>
+  <li><strong>Page age is not a clean lever here.</strong> Under-capturing peaks at 3–6 months (47% vs a 41% base rate) rather than following a decay cliff; this is directional only.</li>
+</ul>
+
+<h2 id="recs"><span class="n">6</span>Ranked recommendations</h2>
+<p>The April queue holds 11,823 pages. Each gets exactly one archetype, one reason code and one action — and every action starts with a human check.</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Archetype (first match wins)</th><th class="num">Pages</th><th class="num">Clicks at stake*</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr><td><b>A.</b> Huge exposure, tiny CTR (≥20k impressions, &lt;25% of expected)</td><td class="num">49</td><td class="num">2,598</td><td>Review search intent: which queries drive the impressions? Re-target or accept.</td></tr>
+    <tr><td><b>E.</b> Top-3, non-informational</td><td class="num">687</td><td class="num">2,199</td><td>Review title &amp; meta (largest upside per impression)</td></tr>
+    <tr><td><b>C.</b> Page one (positions 4–10)</td><td class="num">6,726</td><td class="num">20,767</td><td>Review title &amp; meta; sharpen the promise to the query</td></tr>
+    <tr><td><b>B.</b> Top-3, informational</td><td class="num">1,033</td><td class="num">3,889</td><td>Check the live results page first — an answer box may be taking the clicks — then monitor</td></tr>
+    <tr><td><b>D.</b> Positions 11–20</td><td class="num">1,959</td><td class="num">785</td><td>Improve relevance and internal links; a snippet alone won't help on page 2</td></tr>
+    <tr><td><b>M.</b> Model-only watch (not flagged by the rule)</td><td class="num">1,369</td><td class="num">—</td><td>Monitor only; re-check next cycle</td></tr>
+  </tbody>
+</table></div>
+<p style="font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:-12px">* 15-day upper bound if each page reached the typical CTR for its position — for prioritising, not a forecast.</p>
+<figure>
+  <img src="img/w07_archetype_clicks.png" alt="Horizontal bars of clicks at stake by archetype; page-one snippet gaps hold the most." loading="lazy">
+  <figcaption><b>Figure 3.</b> Most missing clicks sit on page-one snippet gaps; a handful of huge-exposure pages (A) carry an outsized share each.</figcaption>
+</figure>
+<figure>
+  <img src="img/w07_precision_by_depth.png" alt="Observed precision stays near 0.85 to 0.92 across queue depths while upper-bound clicks per editor hour fall from about 112 at the top 20 to about 35 at the top 250." loading="lazy">
+  <figcaption><b>Figure 4.</b> Precision stays high deeper into the queue, but the value per editor hour falls about threefold from the top 20 to the top 250 — queue depth should follow editor capacity, not "everything flagged".</figcaption>
+</figure>
+<h3>Human review, every time</h3>
+<ol>
+  <li>Open the live results for the page's main query — if a results feature explains the gap, monitor instead of editing (mandatory for A and B).</li>
+  <li>Read the current title and description against the intent; rewrite only if unclear or mismatched.</li>
+  <li>Skip pages changed in the last 30 days; check whether one site dominates the list (a template fix beats twenty page edits).</li>
+  <li>Log the page, action, date and before-CTR, so the next cycle can measure what actually happened.</li>
+</ol>
+<div class="callout warn"><p><strong>Never automate:</strong> publishing rewritten titles (including AI-written ones) without a human; deleting, noindexing or redirecting pages because they appear here; site-wide template changes from model output; reporting clicks at stake as expected gains; editing from the model-only list; acting on pages below 500 impressions.</p></div>
+<h3>Monitoring and retrain triggers</h3>
+<p>Run monthly: queue Precision@50 below 0.60 (or below 0.70 twice) → revisit thresholds; any position bucket's expected CTR moving more than 30% → recompute medians; input drift (PSI) above 0.25 → retrain the second-opinion model; one site above 50% of the top 50 → split the queue by site. On the first run (March → April) precision held at 0.88 and input drift was tiny (PSI ≤ 0.04), but the expected-CTR trigger fired — the reason the playbook recomputes it every month.</p>
+
+<h2 id="repro"><span class="n">7</span>Reproducibility</h2>
+<p>Everything is in the public repository <a href="https://github.com/ShayanAhmed12/flyrank-internship-ml">ShayanAhmed12/flyrank-internship-ml</a>. Every number on this page traces to a committed metrics file in <code>work/outputs/</code>, and every chart is rebuilt from those files by the capstone notebook.</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Step</th><th>Notebook</th><th>Receipt</th></tr></thead>
+  <tbody>
+    <tr><td>Research question</td><td><a href="https://github.com/ShayanAhmed12/flyrank-internship-ml/blob/main/work/notebooks/w01_research_question.ipynb">w01_research_question</a></td><td>—</td></tr>
+    <tr><td>ML task framing</td><td><a href="https://github.com/ShayanAhmed12/flyrank-internship-ml/blob/main/work/notebooks/w02_ml_task_framing.ipynb">w02_ml_task_framing</a></td><td>—</td></tr>
+    <tr><td>Data contract</td><td><a href="https://github.com/ShayanAhmed12/flyrank-internship-ml/blob/main/work/notebooks/w03_data_contract.ipynb">w03_data_contract</a></td><td>—</td></tr>
+    <tr><td>Baseline</td><td><a href="https://github.com/ShayanAhmed12/flyrank-internship-ml/blob/main/work/notebooks/w04_baseline_score.ipynb">w04_baseline_score</a></td><td><code>w04_baseline_metrics.json</code></td></tr>
+    <tr><td>Models</td><td><a href="https://github.com/ShayanAhmed12/flyrank-internship-ml/blob/main/work/notebooks/w05_model.ipynb">w05_model</a></td><td><code>w05_model_metrics.json</code></td></tr>
+    <tr><td>Validation audit</td><td><a href="https://github.com/ShayanAhmed12/flyrank-internship-ml/blob/main/work/notebooks/w06_validation_audit.ipynb">w06_validation_audit</a></td><td><code>w06_validation_metrics.json</code></td></tr>
+    <tr><td>Playbook</td><td><a href="https://github.com/ShayanAhmed12/flyrank-internship-ml/blob/main/work/notebooks/w07_action_playbook.ipynb">w07_action_playbook</a></td><td><code>w07_playbook_metrics.json</code></td></tr>
+    <tr><td>This paper's charts</td><td><a href="https://github.com/ShayanAhmed12/flyrank-internship-ml/blob/main/work/notebooks/capstone.ipynb">capstone</a></td><td>reads all four</td></tr>
+  </tbody>
+</table></div>
+<p><strong>To rerun:</strong> request access to the gated dataset and log in with a read token (<code>hf auth login</code>, or an <code>HF_TOKEN</code> secret in Colab), install <code>requirements.txt</code>, then run the notebooks in order. Seeds are fixed at 42; results were produced with scikit-learn 1.9.1 and pandas 3.1.1 (tree ensembles can shift by a point or two across library versions). The ranked queue CSV is regenerated by the playbook notebook and kept out of git by design.</p>
+
+<h2 id="ack"><span class="n">8</span>Acknowledgments &amp; data credit</h2>
+<p><strong>Built on the FlyRank ML Internship dataset</strong> — <a href="https://flyrank.ai">flyrank.ai</a>. The pseudonymised warehouse release, the starter pipeline and the course material came from the FlyRank ML Internship; the methodology questions in my validation audit were sharpened by reading FlyRank's own <em>State of AI-Driven SEO in Numbers</em> (March 2026) report. Any errors of analysis or interpretation are mine.</p>
+
+<footer>
+  <p>All findings are observational and decision-support: they describe which pages to review first in one portfolio over March–April 2026, not how Google ranks pages or what an edit will produce. No client names, URLs or search queries appear on this page.</p>
+</footer>
+</main>
+<script>
+(function(){
+  var btn=document.getElementById('themeBtn'), root=document.documentElement, KEY='paper-theme';
+  try{var saved=localStorage.getItem(KEY); if(saved){root.setAttribute('data-theme',saved);}}catch(e){}
+  btn.addEventListener('click',function(){
+    var dark=root.getAttribute('data-theme')==='dark' || (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var next=dark?'light':'dark'; root.setAttribute('data-theme',next);
+    try{localStorage.setItem(KEY,next);}catch(e){}
+  });
+})();
+</script>
+</body>
+</html>
