@@ -1,0 +1,15 @@
+{
+  "slice": "warehouse month=2026-03, decision 2026-03-16, features 1-15 Mar, outcome 16-31 Mar",
+  "pages": 57392,
+  "clients": 36,
+  "base_rate": 0.3981,
+  "flagged": 8347,
+  "baseline_p@10": 0.9,
+  "naive_low_ctr_p@10": 0.6,
+  "baseline_p@50": 0.72,
+  "naive_low_ctr_p@50": 0.74,
+  "baseline_p@100": 0.78,
+  "naive_low_ctr_p@100": 0.77,
+  "baseline_p@500": 0.708,
+  "naive_low_ctr_p@500": 0.634
+}
