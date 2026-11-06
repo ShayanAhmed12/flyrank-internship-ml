@@ -1,0 +1,43 @@
+{
+  "split": "GroupKFold(5) by client_hash_id",
+  "pool": "impr_f >= 500",
+  "seed": 42,
+  "sklearn": "1.9.1",
+  "table": [
+    {
+      "method": "Random pick (base rate)",
+      "P@50 mean": 0.248,
+      "P@50 std": 0.0807,
+      "P@20 mean": 0.33,
+      "ROC-AUC mean": 0.5026
+    },
+    {
+      "method": "Week-4 baseline",
+      "P@50 mean": 0.78,
+      "P@50 std": 0.0141,
+      "P@20 mean": 0.8,
+      "ROC-AUC mean": 0.5468
+    },
+    {
+      "method": "Logistic Regression",
+      "P@50 mean": 0.656,
+      "P@50 std": 0.0654,
+      "P@20 mean": 0.7,
+      "ROC-AUC mean": 0.78
+    },
+    {
+      "method": "Random Forest",
+      "P@50 mean": 0.78,
+      "P@50 std": 0.0616,
+      "P@20 mean": 0.83,
+      "ROC-AUC mean": 0.807
+    },
+    {
+      "method": "Gradient Boosting",
+      "P@50 mean": 0.776,
+      "P@50 std": 0.0623,
+      "P@20 mean": 0.82,
+      "ROC-AUC mean": 0.8065
+    }
+  ]
+}
