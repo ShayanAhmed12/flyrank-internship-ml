@@ -1,0 +1,56 @@
+{
+  "seed": 42,
+  "sklearn": "1.9.1",
+  "dev": "month=2026-03, decision 2026-03-16",
+  "time_forward_test": "month=2026-04, decision 2026-04-16 (scored once)",
+  "results": [
+    {
+      "design": "BEFORE random-by-page (Mar)",
+      "method": "Random Forest",
+      "P50": 0.808,
+      "P50_std": 0.073,
+      "AUC": 0.811,
+      "pool base rate": 0.2665
+    },
+    {
+      "design": "BEFORE random-by-page (Mar)",
+      "method": "Week-4 rule",
+      "P50": 0.732,
+      "P50_std": 0.059,
+      "AUC": 0.55,
+      "pool base rate": 0.2665
+    },
+    {
+      "design": "AFTER grouped-by-client (Mar)",
+      "method": "Random Forest",
+      "P50": 0.78,
+      "P50_std": 0.062,
+      "AUC": 0.807,
+      "pool base rate": 0.2665
+    },
+    {
+      "design": "AFTER grouped-by-client (Mar)",
+      "method": "Week-4 rule",
+      "P50": 0.78,
+      "P50_std": 0.014,
+      "AUC": 0.547,
+      "pool base rate": 0.2665
+    },
+    {
+      "design": "AFTER time-forward (Mar->Apr)",
+      "method": "Week-4 rule",
+      "P50": 0.88,
+      "P50_std": NaN,
+      "AUC": 0.568,
+      "pool base rate": 0.2945
+    },
+    {
+      "design": "AFTER time-forward (Mar->Apr)",
+      "method": "Random Forest",
+      "P50": 0.9,
+      "P50_std": NaN,
+      "AUC": 0.809,
+      "pool base rate": 0.2945
+    }
+  ]
+}
