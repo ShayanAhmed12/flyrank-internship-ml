@@ -1,0 +1,133 @@
+{
+  "decision_day": "2026-04-16",
+  "features": "1-15 Apr 2026",
+  "rule": "Week-4 frozen (impr_f>=500, ctr < 0.5 x bucket median)",
+  "second_opinion": "RandomForest trained on March 2026 (ML-08 settings)",
+  "seed": 42,
+  "sklearn": "1.9.1",
+  "queue_rows": 11823,
+  "rule_flagged": 10454,
+  "archetypes": [
+    {
+      "archetype": "A broad-query mismatch",
+      "action": "review_search_intent",
+      "pages": 49,
+      "clicks_at_stake_15d": 2598.209,
+      "model_agrees": 1.0
+    },
+    {
+      "archetype": "B top-3 zero-click risk",
+      "action": "check_serp_then_monitor",
+      "pages": 1033,
+      "clicks_at_stake_15d": 3889.39,
+      "model_agrees": 0.53
+    },
+    {
+      "archetype": "C page-one snippet gap",
+      "action": "review_title_meta",
+      "pages": 6726,
+      "clicks_at_stake_15d": 20767.443,
+      "model_agrees": 0.402
+    },
+    {
+      "archetype": "D striking-distance gap",
+      "action": "improve_relevance",
+      "pages": 1959,
+      "clicks_at_stake_15d": 785.344,
+      "model_agrees": 0.258
+    },
+    {
+      "archetype": "E top-3 snippet gap",
+      "action": "review_title_meta",
+      "pages": 687,
+      "clicks_at_stake_15d": 2198.693,
+      "model_agrees": 0.405
+    },
+    {
+      "archetype": "M model-only watch",
+      "action": "monitor",
+      "pages": 1369,
+      "clicks_at_stake_15d": 0.0,
+      "model_agrees": 0.0
+    }
+  ],
+  "cost_value": [
+    {
+      "top_k": 20,
+      "editor_hours (@40 min)": 13.3,
+      "observed precision": 0.9,
+      "clicks_at_stake_15d (upper bound)": 1666,
+      "upper-bound clicks per editor hour": 112.5
+    },
+    {
+      "top_k": 50,
+      "editor_hours (@40 min)": 33.3,
+      "observed precision": 0.88,
+      "clicks_at_stake_15d (upper bound)": 2869,
+      "upper-bound clicks per editor hour": 75.8
+    },
+    {
+      "top_k": 100,
+      "editor_hours (@40 min)": 66.7,
+      "observed precision": 0.92,
+      "clicks_at_stake_15d (upper bound)": 4224,
+      "upper-bound clicks per editor hour": 58.3
+    },
+    {
+      "top_k": 250,
+      "editor_hours (@40 min)": 166.7,
+      "observed precision": 0.852,
+      "clicks_at_stake_15d (upper bound)": 6925,
+      "upper-bound clicks per editor hour": 35.4
+    }
+  ],
+  "decay_by_age": [
+    {
+      "age_bucket": "0-90d",
+      "n": 20402,
+      "under_capture_rate": 0.3755,
+      "median_ctr_ratio": 1.2168
+    },
+    {
+      "age_bucket": "91-180d",
+      "n": 9118,
+      "under_capture_rate": 0.4737,
+      "median_ctr_ratio": 0.6857
+    },
+    {
+      "age_bucket": "181-270d",
+      "n": 12567,
+      "under_capture_rate": 0.4373,
+      "median_ctr_ratio": 0.8721
+    },
+    {
+      "age_bucket": "271-365d",
+      "n": 9333,
+      "under_capture_rate": 0.3712,
+      "median_ctr_ratio": 1.186
+    },
+    {
+      "age_bucket": "365d+",
+      "n": 8112,
+      "under_capture_rate": 0.4244,
+      "median_ctr_ratio": 0.8212
+    }
+  ],
+  "monitoring_run": {
+    "queue_P@50_april": 0.88,
+    "expected_ctr_max_change": 0.598,
+    "psi_ctr_f": 0.036,
+    "psi_pos_f": 0.013,
+    "psi_log_impr_f": 0.031,
+    "pool_base_rate_march": 0.266,
+    "pool_base_rate_april": 0.295,
+    "top50_largest_client_share": 0.32
+  },
+  "triggers": {
+    "queue_P@50_april": false,
+    "expected_ctr_max_change": true,
+    "psi (any)": false,
+    "base rate shift > 10pt": false,
+    "concentration > 50%": false
+  }
+}
